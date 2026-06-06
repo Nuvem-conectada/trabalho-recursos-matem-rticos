@@ -70,7 +70,7 @@ int[][] mapBaixo = {
 };
 
 int[][] mapEsquerda = {
-  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}, // CORRIGIDO: Liberada a coluna 6 para subir
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}, 
   {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
   {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -138,7 +138,7 @@ int[][] mapDireitaCima = {
   {1,0,1,0,0,0,0,0,0,0,1,0,1,4,1},
   {1,1,1,0,1,1,0,1,1,1,1,0,1,1,1},
   {1,0,0,0,4,1,0,1,0,0,0,0,1,1,1},
-  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1} // CORRIGIDO: Liberados os índices 6, 7 e 8 para descer
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1} 
 };
 
 int[][] mapEsquerdaBaixo = {
@@ -192,7 +192,7 @@ int[][] mapEsquerdaCima = {
   {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
   {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
   {1,0,2,2,0,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1} // CORRIGIDO: Alinhado perfeitamente com a coluna 6 do mapEsquerda
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1} 
 }; 
 
 void setup() {
@@ -282,7 +282,6 @@ void keyPressed() {
   if (key == 'w' || key == 'W') ny--;
   if (key == 's' || key == 'S') ny++;
 
-  // transição mapa nas bordas
   if (nx > 14) { proximoMapaX++; nx = 0;  } 
   if (nx < 0)  { proximoMapaX--; nx = 14; } 
   if (ny > 14) { proximoMapaY++; ny = 0;  } 
@@ -293,12 +292,24 @@ void keyPressed() {
   if (mapaDestino != null) {
     int blocoAlvo = mapaDestino[ny][nx];
 
-    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo ==4) {
+    // Se for chão, caverna ou moeda pode andar
+    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4) {
+      
+      // Se moeda
+      if (blocoAlvo == 4) {
+        moedinhas++;          // Aumenta a contagem
+        mapaDestino[ny][nx] = 0; // Transforma a moeda em chão
+      }
+      
       mapaAtualX = proximoMapaX;
       mapaAtualY = proximoMapaY;
       posPlayer.x = nx;
       posPlayer.y = ny;
-
-        }
     }
+  }
+}
+void Hud() {
+  fill(255);
+  textSize(20);
+  text("Moedas: " + moedinhas, 10, 30);
 }
