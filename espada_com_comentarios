@@ -1,0 +1,383 @@
+int mapaAtualX = 0;
+int mapaAtualY = 0;
+
+int sizeTile = 50;
+PVector posPlayer;
+
+color corChao = color(184, 91, 12); 
+//color corChao = color(255,236,179);
+color corParede = color(27, 69, 16);       
+color corJogador = color(50, 205, 50); 
+color corAgua = color(32, 56, 236);
+color corCaverna = color(0, 0, 0);
+
+//Espada
+
+boolean isSwordAttacking = false; // booleana que identifica se a espada foi ativada
+
+int swordDuration = 200; // duração que a espada está na tela em milissegundos
+int swordElapsedTime = 0; // tempo que passa a partir do momento em que a ação é iniciada
+
+int swordDirection = 0; // variável que guarda a direção em que o player está olhando
+// 0 = direita - D
+// 1 = esquerda - A
+// 2 = cima - W
+// 3 = baixo - S
+
+float swordX; //variável da hitbox da espada no eixo X
+float swordY; //variável da hitbox da espada no eixo Y
+float swordW; // largura da espada
+float swordH; // altura da espada
+
+//  Grid 15x15
+int[][] mapCentro = {
+  {1,1,1,1,1,1,1,0,1,1,1,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,1,1,0,0,0,0,1,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1}
+};
+
+int[][] mapCima = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,0,0,0,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1}
+};
+
+int[][] mapBaixo = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,0,0,0,1,1,0,1,1,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,2,2,2,2,2,2,2,2,2,0,0,1},
+  {1,0,2,2,2,2,2,2,2,2,2,2,2,0,1},
+  {1,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
+  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
+};
+
+int[][] mapEsquerda = {
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}, // CORRIGIDO: Liberada a coluna 6 para subir
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,1},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,1},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,1,1,1,1,3,3,3,1,1,1,1,1,1}
+};
+
+int[][] mapDireita = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,0,0,0,1,0,0,0,1,0,0,1},
+  {1,0,1,1,0,0,1,0,1,0,0,1,1,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+  {0,0,0,1,0,0,1,1,1,0,0,1,0,0,0},
+  {0,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,1,1,0,0,1,0,1,0,0,1,1,0,1},
+  {1,0,0,1,0,0,0,1,0,0,0,1,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapDireitaDireita = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,1,1,1,1,0,0,0,0,0,1,1,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,2,2},
+  {1,0,0,0,0,0,0,0,0,0,0,2,2,2,2},
+  {2,2,2,0,0,0,0,0,0,0,2,2,2,2,2},
+  {2,2,2,2,0,0,0,0,0,2,2,2,2,2,1},
+  {2,2,2,2,2,2,0,0,2,2,2,2,2,1,1},
+  {2,2,2,2,2,2,2,2,2,2,2,2,1,1,1}
+};
+
+int[][] mapDireitaCima = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,0,0,0,1,1,1,1,1,1,1,1},
+  {1,0,0,1,0,1,1,1,0,0,0,0,0,0,1},
+  {1,0,0,1,1,1,0,0,0,1,0,1,1,1,1},
+  {1,1,0,0,0,0,0,1,0,1,0,0,1,0,1},
+  {1,0,1,0,1,0,0,1,0,1,0,1,1,0,1},
+  {1,0,0,0,1,1,1,1,0,1,0,0,1,0,1},
+  {1,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1},
+  {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1},
+  {1,0,1,0,0,0,0,0,0,0,1,0,1,0,1},
+  {1,1,1,0,1,1,0,1,1,1,1,0,1,1,1},
+  {1,0,0,0,0,1,0,1,0,0,0,0,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1} // CORRIGIDO: Liberados os índices 6, 7 e 8 para descer
+};
+
+int[][] mapEsquerdaBaixo = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,2,2,2,1,0,0,0,0,1},
+  {1,1,0,0,1,2,2,0,2,2,1,0,0,1,1},
+  {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
+  {1,1,0,1,2,0,0,0,0,0,2,1,0,1,1},
+  {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
+  {1,0,0,0,1,2,2,0,2,2,1,0,0,0,1},
+  {1,0,0,0,0,1,2,0,2,1,0,0,0,0,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapEsquerdaEsquerda = {
+  {1,1,2,2,2,2,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,1},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,0},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,0},
+  {1,0,0,0,0,2,2,2,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,2,2,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,2,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,2,0,0,0,0,0,0,1},
+  {1,0,0,0,0,2,2,2,0,0,0,0,0,0,1},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,1},
+  {1,1,1,1,2,2,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapEsquerdaCima = {
+  {1,2,2,1,1,1,1,1,1,1,1,1,1,1,1},
+  {2,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1} // CORRIGIDO: Alinhado perfeitamente com a coluna 6 do mapEsquerda
+}; 
+
+void setup() {
+  size(750, 750);
+  posPlayer = new PVector(7, 7); 
+}
+
+void draw() {
+  background(corChao); 
+  drawMap();
+  drawPlayer();
+  
+  if (isSwordAttacking) { // verifica se a espada está na tela
+    drawSword(); //chama a função para desenhar a espada
+    
+    if (millis() - swordElapsedTime > swordDuration){ // se o tempo cronometrado por millis menos o tempo da ação da espada for maior que o tempo de duração da espada
+    isSwordAttacking = false; // torna a booleana falsa e a espada é recolhida
+    }
+  }
+  
+}
+
+int[][] getMapaPorCoordenada(int x, int y) {
+  if (x == 1 && y == 0)   return mapDireita;
+  if (x == 1 && y == -1)  return mapDireitaCima;
+  if (x == 2 && y == 0)   return mapDireitaDireita;
+  
+  if (x == -1 && y == 0)  return mapEsquerda;
+  if (x == -1 && y == -1) return mapEsquerdaCima;
+  if (x == -1 && y == 1)  return mapEsquerdaBaixo;
+  if (x == -2 && y == 0)  return mapEsquerdaEsquerda;
+  
+  if (x == 0 && y == -1)  return mapCima;
+  if (x == 0 && y == 1)   return mapBaixo;
+  if (x == 0 && y == 0)   return mapCentro;
+
+  return null;
+}
+
+int[][] getMapaAtual() {
+  return getMapaPorCoordenada(mapaAtualX, mapaAtualY);
+}
+
+void drawMap() {
+  int[][] mapa = getMapaAtual(); 
+  stroke(40, 30); 
+  
+  for (int i = 0; i < 15; i++) {
+    for (int j = 0; j < 15; j++) {
+      if (mapa[i][j] == 0) {
+        fill(corChao); 
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      else if (mapa[i][j] == 2) {
+        fill(corAgua);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      else if (mapa[i][j] == 3) {
+        fill(corCaverna);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      else {
+        fill(corChao);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+        
+        fill(corParede);
+        ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2, sizeTile, sizeTile);
+      }
+    }
+  }
+}
+
+void drawPlayer() {
+  fill(corJogador);
+  noStroke();
+  rect(posPlayer.x * sizeTile, posPlayer.y * sizeTile, sizeTile, sizeTile);
+}
+
+// Função para a espada
+
+void drawSword() {
+
+  fill(200);
+
+  float px = posPlayer.x * sizeTile;
+  float py = posPlayer.y * sizeTile;
+
+  switch(swordDirection) {
+
+  case 0: // direita
+    rect(swordX, swordY, swordW, swordH);
+    swordX = px + sizeTile;
+    swordY = py + 10;
+    swordW = 20;
+    swordH = 30;
+    break;
+
+  case 1: // esquerda
+    rect(px - 20, py + 10, 20, 30);
+    swordX = px - 20;
+    swordY = py + 10;
+    swordW = 20;
+    swordH = 30;
+    break;
+
+  case 2: // cima
+    rect(px + 10, py - 20, 30, 20);
+    swordX = px + 10;
+    swordY = py - 20;
+    swordW = 30;
+    swordH = 20;
+    break;
+
+  case 3: // baixo
+    rect(px + 10, py + sizeTile, 30, 20);
+    swordX = px + 10;
+    swordY = py + sizeTile;
+    swordW = 30;
+    swordH = 20;
+    break;
+  }
+}
+
+void keyPressed() {
+  int nx = int(posPlayer.x);
+  int ny = int(posPlayer.y);
+  
+  int proximoMapaX = mapaAtualX;
+  int proximoMapaY = mapaAtualY;
+
+  if (key == 'd' || key == 'D') {
+  nx++;
+  swordDirection = 0;
+} // direction = 0
+  if (key == 'a' || key == 'A') {
+  nx--;
+  swordDirection = 1;
+} // direction = 1
+  if (key == 'w' || key == 'W') {
+  ny--;
+  swordDirection = 2;
+} // direction = 2
+  if (key == 's' || key == 'S') {
+  ny++;
+  swordDirection = 3;
+} // direction = 3
+
+print(swordDirection);
+
+  if ((key == 'o' || key == 'O') && !isSwordAttacking){
+  isSwordAttacking = true;
+  swordElapsedTime = millis(); // ao apertar o botão, a booleana fica verdadeira e a variável elapsed começa a contar tempo
+  }
+
+  // transição mapa nas bordas
+  if (nx > 14) { proximoMapaX++; nx = 0;  } 
+  if (nx < 0)  { proximoMapaX--; nx = 14; } 
+  if (ny > 14) { proximoMapaY++; ny = 0;  } 
+  if (ny < 0)  { proximoMapaY--; ny = 14; } 
+
+  int[][] mapaDestino = getMapaPorCoordenada(proximoMapaX, proximoMapaY);
+  
+  if (mapaDestino != null) {
+    int blocoAlvo = mapaDestino[ny][nx];
+    
+    if (blocoAlvo == 0 || blocoAlvo == 3) {
+      mapaAtualX = proximoMapaX;
+      mapaAtualY = proximoMapaY;
+      posPlayer.x = nx;
+      posPlayer.y = ny;
+    }
+  }
+}
