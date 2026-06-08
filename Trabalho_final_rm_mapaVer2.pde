@@ -2,18 +2,24 @@ int mapaAtualX = 0;
 int mapaAtualY = 0;
 
 int sizeTile = 50;
+
+int Ttimer=1000;//um mile segundo
+int tempo=30*Ttimer;//tempo vezes mile segundos = segundo real
+
 PVector posPlayer;
 
+color corChave = color(255, 100,100); 
 color corChao = color(184, 91, 12); 
 color corParede = color(27, 69, 16);       
 color corJogador = color(50, 205, 50); 
 color corAgua = color(32, 56, 236);
 color corCaverna = color(0, 0, 0);
+color corMoedinha = color(250, 250, 0);
 
 //coletáveis
 int moedinhas=0;
-color corMoedinha = color(250, 250, 0);
 
+boolean chave = false;
 //  Grid 15x15
 int[][] mapCentro = {
   {1,1,1,1,1,1,1,0,1,1,1,1,1,1,1},
@@ -125,7 +131,7 @@ int[][] mapDireitaDireita = {
 
 int[][] mapDireitaCima = {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,1,4,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,4,0,0,0,0,0,0,0,0,0,0,5,1},
   {1,0,0,1,0,0,0,1,1,1,1,1,1,1,1},
   {1,0,0,1,0,1,1,1,0,0,0,0,0,0,1},
   {1,0,0,1,1,1,0,0,0,1,0,1,1,1,1},
@@ -250,6 +256,12 @@ void drawMap() {
         fill(corMoedinha);
         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2, sizeTile*0.6, sizeTile*0.6);
       }
+      
+      //chave
+       else if (mapa[i][j] == 5) {
+        fill(corChave);
+        triangle(j*sizeTile+sizeTile/2,i*sizeTile+sizeTile*0.1,j*sizeTile+sizeTile*0.1, i*sizeTile+sizeTile*0.9,j*sizeTile+sizeTile*0.9, i*sizeTile+sizeTile*0.9);
+      }
       else {
         fill(corChao);
         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
@@ -258,9 +270,18 @@ void drawMap() {
         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2, sizeTile, sizeTile);
       }
     }
-     fill(255);
+    //tempo 
+    if (tempo>0){
+      tempo--;
+    }
+    //hud
      textSize(20);
+     fill(corMoedinha);
      text("moedas: " + moedinhas, 10, 30);
+     fill(corChave);
+     text("chave: "+chave, 10, 90);
+     fill(255);
+     text("Tempo: "+tempo/1000, 10,60 );
   }
 }
 //desenhando jogador
@@ -293,12 +314,17 @@ void keyPressed() {
     int blocoAlvo = mapaDestino[ny][nx];
 
     // Se for chão, caverna ou moeda pode andar
-    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4) {
+    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4|| blocoAlvo == 5) {
       
       // Se moeda
       if (blocoAlvo == 4) {
-        moedinhas++;          // Aumenta a contagem
+        moedinhas++;          // Aumenta a contage
         mapaDestino[ny][nx] = 0; // Transforma a moeda em chão
+      }
+      // se chave
+     if (blocoAlvo == 5) {
+        chave=true;          // está com a chav
+        mapaDestino[ny][nx] = 0; // transforma chave em chão
       }
       
       mapaAtualX = proximoMapaX;
@@ -308,8 +334,5 @@ void keyPressed() {
     }
   }
 }
-void Hud() {
-  fill(255);
-  textSize(20);
-  text("Moedas: " + moedinhas, 10, 30);
-}
+
+ 
