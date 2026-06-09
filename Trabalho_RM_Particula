@@ -1,0 +1,393 @@
+int mapaAtualX = 0;
+int mapaAtualY = 0;
+
+int sizeTile = 50;
+
+int Ttimer=100;//um mile segundo
+int tempo=60*Ttimer;//tempo vezes mile segundos = segundo real
+
+PVector posPlayer;
+
+color corChave = color(255, 100,100); 
+color corChao = color(184, 91, 12); 
+color corParede = color(27, 69, 16);       
+color corJogador = color(50, 205, 50); 
+color corAgua = color(32, 56, 236);
+color corCaverna = color(0, 0, 0);
+color corMoedinha = color(250, 250, 0);
+
+//coletáveis
+int moedinhas=0;
+
+boolean chave = false;
+
+// partículas
+
+boolean onParticleCollision = false;
+
+float particula_x1 = random(20,570);
+float particula_y1 = random(20,570);
+
+//  Grid 15x15
+int[][] mapCentro = {
+  {1,1,1,1,1,1,1,0,1,1,1,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,1,1,0,0,0,0,1,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,1,1,1,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  {1,1,1,1,1,1,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1}
+};
+
+int[][] mapCima = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,1,1,0,0,4,0,0,0,1,1,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,0,0,0,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
+  {1,0,4,0,0,1,1,1,1,1,0,0,4,0,1},
+  {1,0,0,0,0,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,0,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,4,0,0,0,0,0,0,4,0,0,1},
+  {1,0,0,1,1,0,0,0,0,0,0,1,1,0,1},
+  {1,0,0,1,1,0,0,4,0,0,0,1,1,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1}
+};
+
+int[][] mapBaixo = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,0,0,0,1,1,0,1,1,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,4,4,0,4,4,0,0,0,0,0,0,0,1},
+  {1,0,4,4,4,4,4,0,0,0,0,0,0,0,1},
+  {1,0,0,4,4,4,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,4,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,2,2,2,2,2,2,2,2,2,0,0,1},
+  {1,0,2,2,2,2,2,2,2,2,2,2,2,0,1},
+  {1,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
+  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},
+  {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
+};
+
+int[][] mapEsquerda = {
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1}, 
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,1},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,0},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,1},
+  {0,0,0,0,1,1,1,1,1,1,0,0,0,0,1},
+  {1,0,0,0,0,1,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,1,1,1,1,3,3,3,1,1,1,1,1,1}
+};
+
+int[][] mapDireita = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,4,1,0,0,0,1,0,0,0,1,4,0,1},
+  {1,0,1,1,0,0,1,4,1,0,0,1,1,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+  {1,0,4,1,0,0,1,1,1,0,0,1,4,0,0},
+  {1,0,1,0,0,0,0,1,0,0,0,0,1,0,0},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,1,1,0,0,1,4,1,0,0,1,1,0,1},
+  {1,0,4,1,0,0,0,1,0,0,0,1,4,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapDireitaDireita = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,1,1,1,1,0,0,0,0,0,1,1,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,4,0,0,0,0,4,0,0,0,0,1},
+  {0,0,0,0,4,0,0,0,0,4,0,0,0,0,1},
+  {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {0,0,0,4,0,0,0,0,0,0,4,0,0,0,2},
+  {1,0,0,0,4,0,0,0,0,4,0,0,0,2,2},
+  {1,0,0,0,0,4,4,4,4,0,0,2,2,2,2},
+  {2,2,2,0,0,0,0,0,0,0,2,2,2,2,2},
+  {2,2,2,2,0,0,0,0,0,2,2,2,2,2,1},
+  {2,2,2,2,2,2,0,0,2,2,2,2,2,1,1},
+  {2,2,2,2,2,2,2,2,2,2,2,2,1,1,1}
+};
+
+int[][] mapDireitaCima = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,1,4,0,0,0,0,0,0,0,0,0,0,5,1},
+  {1,0,0,1,0,0,0,1,1,1,1,1,1,1,1},
+  {1,0,0,1,0,1,1,1,0,0,0,0,0,0,1},
+  {1,0,0,1,1,1,0,0,0,1,0,1,1,1,1},
+  {1,1,0,0,0,0,0,1,0,1,0,0,1,4,1},
+  {1,0,1,0,1,4,0,1,0,1,0,1,1,0,1},
+  {1,0,0,0,1,1,1,1,0,1,0,0,1,0,1},
+  {1,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1},
+  {1,0,1,0,1,1,1,1,1,1,1,0,1,0,1},
+  {1,0,1,0,0,0,0,0,0,0,1,0,1,4,1},
+  {1,1,1,0,1,1,0,1,1,1,1,0,1,1,1},
+  {1,0,0,0,4,1,0,1,0,0,0,0,1,1,1},
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1} 
+};
+
+int[][] mapEsquerdaBaixo = {
+  {1,1,1,1,1,1,0,0,0,1,1,1,1,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,2,2,2,1,0,0,0,0,1},
+  {1,1,0,0,1,2,2,0,2,2,1,0,0,1,1},
+  {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
+  {1,1,0,1,2,0,0,6,0,0,2,1,0,1,1},
+  {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
+  {1,0,0,0,1,2,2,0,2,2,1,0,0,0,1},
+  {1,0,0,0,0,1,2,0,2,1,0,0,0,0,1},
+  {1,1,0,0,0,0,0,0,0,0,0,0,0,1,1},
+  {1,1,1,0,0,0,0,0,0,0,0,0,1,1,1},
+  {1,1,1,1,0,0,0,0,0,0,0,1,1,1,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapEsquerdaEsquerda = {
+  {1,1,2,2,2,2,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,2,2,2,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,1},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,0},
+  {1,0,0,0,2,2,2,0,0,0,0,0,0,0,0},
+  {1,0,0,0,0,2,2,2,0,0,0,0,0,0,0},
+  {1,0,0,0,0,0,2,2,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,2,2,0,0,0,0,0,0,1},
+  {1,4,4,4,4,4,2,2,0,0,0,0,0,0,1},
+  {1,4,4,4,4,2,2,2,0,0,0,0,0,0,1},
+  {1,4,4,4,2,2,2,0,0,0,0,0,0,0,1},
+  {1,1,1,1,2,2,1,1,1,1,1,1,1,1,1}
+};
+
+int[][] mapEsquerdaCima = {
+  {1,2,2,1,1,1,1,1,1,1,1,1,1,1,1},
+  {2,2,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,0,0,0,0,0,0,4,4,4,0,0,0,0,1},
+  {1,0,0,0,0,0,4,0,0,0,4,0,0,0,1},
+  {2,0,0,0,0,0,4,0,0,0,4,0,0,0,1},
+  {2,2,0,0,0,0,0,0,4,4,0,0,0,0,1},
+  {2,2,0,0,0,0,0,0,4,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,4,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,0,0,0,0,0,0,1},
+  {2,2,2,0,0,0,0,0,4,0,0,0,0,0,1},
+  {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,2,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,2,2,0,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,0,1,1,1,1,1,1,1,1} 
+}; 
+
+void setup() {
+  size(750, 750);
+  posPlayer = new PVector(7, 7); 
+}
+
+void draw() {
+  background(corChao); 
+  drawMap();
+  drawPlayer();
+  hud();
+  particulasMovimento();
+  fill(0,255,255);
+ ellipse(particula_x1, particula_y1, 5,5);
+  //tempo rodando
+    if (tempo>0){
+      tempo--;
+    }
+}
+
+int[][] getMapaPorCoordenada(int x, int y) {
+  if (x == 1 && y == 0)   return mapDireita;
+  if (x == 1 && y == -1)  return mapDireitaCima;
+  if (x == 2 && y == 0)   return mapDireitaDireita;
+  
+  if (x == -1 && y == 0)  return mapEsquerda;
+  if (x == -1 && y == -1) return mapEsquerdaCima;
+  if (x == -1 && y == 1)  return mapEsquerdaBaixo;
+  if (x == -2 && y == 0)  return mapEsquerdaEsquerda;
+  
+  if (x == 0 && y == -1)  return mapCima;
+  if (x == 0 && y == 1)   return mapBaixo;
+  if (x == 0 && y == 0)   return mapCentro;
+
+  return null;
+}
+
+int[][] getMapaAtual() {
+  return getMapaPorCoordenada(mapaAtualX, mapaAtualY);
+}
+//desenhando objetos
+void drawMap() {
+  int[][] mapa = getMapaAtual(); 
+  stroke(40, 30); 
+  
+  for (int i = 0; i < 15; i++) {
+    for (int j = 0; j < 15; j++) {
+      if (mapa[i][j] == 0) {
+        fill(corChao); 
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      else if (mapa[i][j] == 2) {
+        fill(corAgua);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      else if (mapa[i][j] == 3) {
+        fill(corCaverna);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+      }
+      //moedinhas
+       else if (mapa[i][j] == 4) {
+        fill(corMoedinha);
+        ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2, sizeTile*0.6, sizeTile*0.6);
+      }
+      
+      //chave
+       else if (mapa[i][j] == 5) {
+        fill(corChave);
+        triangle(j*sizeTile+sizeTile/2,i*sizeTile+sizeTile*0.1,j*sizeTile+sizeTile*0.1, i*sizeTile+sizeTile*0.9,j*sizeTile+sizeTile*0.9, i*sizeTile+sizeTile*0.9);
+      }
+      //baú
+       else if (mapa[i][j] == 6) {
+         fill(150,75,0);
+         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+         
+         fill(100,75,0);
+         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile*0.3);
+         
+         
+         fill(corMoedinha);
+         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2-10, sizeTile*0.4, sizeTile*0.4);
+         
+         fill(corChave);
+         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2-10, sizeTile*0.3, sizeTile*0.3);
+      }
+      else {
+        fill(corChao);
+        rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+        
+        fill(corParede);
+        ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2, sizeTile, sizeTile);
+      }
+    }
+    //tempo 
+
+  }
+
+}
+//desenhando jogador
+void drawPlayer() {
+  fill(corJogador);
+  noStroke();
+  rect(posPlayer.x * sizeTile, posPlayer.y * sizeTile, sizeTile, sizeTile);
+}
+
+void keyPressed() {
+  int nx = int(posPlayer.x);
+  int ny = int(posPlayer.y);
+  
+  int proximoMapaX = mapaAtualX;
+  int proximoMapaY = mapaAtualY;
+
+  if (key == 'd' || key == 'D') nx++;
+  if (key == 'a' || key == 'A') nx--;
+  if (key == 'w' || key == 'W') ny--;
+  if (key == 's' || key == 'S') ny++;
+
+  if (nx > 14) { proximoMapaX++; nx = 0;  } 
+  if (nx < 0)  { proximoMapaX--; nx = 14; } 
+  if (ny > 14) { proximoMapaY++; ny = 0;  } 
+  if (ny < 0)  { proximoMapaY--; ny = 14; } 
+
+  int[][] mapaDestino = getMapaPorCoordenada(proximoMapaX, proximoMapaY);
+  
+  if (mapaDestino != null) {
+    int blocoAlvo = mapaDestino[ny][nx];
+
+    // Se for chão, caverna ou moeda pode andar
+    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4|| blocoAlvo == 5|| blocoAlvo == 6) {
+      
+      // Se moeda
+      if (blocoAlvo == 4) {
+        moedinhas++;          // Aumenta a contage
+        mapaDestino[ny][nx] = 0; // Transforma a moeda em chão
+      }
+      // se chave
+     if (blocoAlvo == 5) {
+        chave=true;          // está com a chav
+        mapaDestino[ny][nx] = 0; // transforma chave em chão
+      }
+       if (blocoAlvo == 6 ) {
+         if  (chave==true) {
+             
+          fill(255);
+          textSize(100);
+          text("VOCÊ GANHOU!!!",35, height/2);
+          noLoop();}
+      }
+      
+      mapaAtualX = proximoMapaX;
+      mapaAtualY = proximoMapaY;
+      posPlayer.x = nx;
+      posPlayer.y = ny;
+    }
+  }
+
+}
+void hud(){
+    
+    //hud
+     textSize(20);
+     fill(corMoedinha);
+     text("moedas: " + moedinhas, 10, 30);
+     fill(corChave);
+     text("chave: "+chave, 10, 90);
+     fill(255);
+     text("Tempo: "+tempo/Ttimer, 10,60 );
+      if (tempo <= 0) {
+  fill(255);
+  textSize(100);
+  text("SEM TEMPO!!!",100, height/2);
+  noLoop();
+  }
+}
+ 
+void particulasMovimento() {
+
+particula_y1 += 5; 
+  if (particula_y1 > height) {
+  particula_y1 = 0;
+  particula_x1 = random(15, 740);
+  }
+}
