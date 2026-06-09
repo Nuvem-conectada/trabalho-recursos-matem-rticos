@@ -3,8 +3,8 @@ int mapaAtualY = 0;
 
 int sizeTile = 50;
 
-int Ttimer=1000;//um mile segundo
-int tempo=30*Ttimer;//tempo vezes mile segundos = segundo real
+int Ttimer=100;//um mile segundo
+int tempo=60*Ttimer;//tempo vezes mile segundos = segundo real
 
 PVector posPlayer;
 
@@ -20,6 +20,8 @@ color corMoedinha = color(250, 250, 0);
 int moedinhas=0;
 
 boolean chave = false;
+
+
 //  Grid 15x15
 int[][] mapCentro = {
   {1,1,1,1,1,1,1,0,1,1,1,1,1,1,1},
@@ -155,7 +157,7 @@ int[][] mapEsquerdaBaixo = {
   {1,0,0,0,0,1,2,2,2,1,0,0,0,0,1},
   {1,1,0,0,1,2,2,0,2,2,1,0,0,1,1},
   {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
-  {1,1,0,1,2,0,0,4,0,0,2,1,0,1,1},
+  {1,1,0,1,2,0,0,6,0,0,2,1,0,1,1},
   {1,1,0,1,2,2,0,0,0,2,2,1,0,1,1},
   {1,0,0,0,1,2,2,0,2,2,1,0,0,0,1},
   {1,0,0,0,0,1,2,0,2,1,0,0,0,0,1},
@@ -210,6 +212,11 @@ void draw() {
   background(corChao); 
   drawMap();
   drawPlayer();
+  hud();
+  //tempo rodando
+    if (tempo>0){
+      tempo--;
+    }
 }
 
 int[][] getMapaPorCoordenada(int x, int y) {
@@ -262,6 +269,21 @@ void drawMap() {
         fill(corChave);
         triangle(j*sizeTile+sizeTile/2,i*sizeTile+sizeTile*0.1,j*sizeTile+sizeTile*0.1, i*sizeTile+sizeTile*0.9,j*sizeTile+sizeTile*0.9, i*sizeTile+sizeTile*0.9);
       }
+      //baú
+       else if (mapa[i][j] == 6) {
+         fill(150,75,0);
+         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
+         
+         fill(100,75,0);
+         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile*0.3);
+         
+         
+         fill(corMoedinha);
+         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2-10, sizeTile*0.4, sizeTile*0.4);
+         
+         fill(corChave);
+         ellipse(j * sizeTile + sizeTile/2, i * sizeTile + sizeTile/2-10, sizeTile*0.3, sizeTile*0.3);
+      }
       else {
         fill(corChao);
         rect(j * sizeTile, i * sizeTile, sizeTile, sizeTile);
@@ -271,18 +293,9 @@ void drawMap() {
       }
     }
     //tempo 
-    if (tempo>0){
-      tempo--;
-    }
-    //hud
-     textSize(20);
-     fill(corMoedinha);
-     text("moedas: " + moedinhas, 10, 30);
-     fill(corChave);
-     text("chave: "+chave, 10, 90);
-     fill(255);
-     text("Tempo: "+tempo/1000, 10,60 );
+
   }
+
 }
 //desenhando jogador
 void drawPlayer() {
@@ -314,7 +327,7 @@ void keyPressed() {
     int blocoAlvo = mapaDestino[ny][nx];
 
     // Se for chão, caverna ou moeda pode andar
-    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4|| blocoAlvo == 5) {
+    if (blocoAlvo == 0 || blocoAlvo == 3 || blocoAlvo == 4|| blocoAlvo == 5|| blocoAlvo == 6) {
       
       // Se moeda
       if (blocoAlvo == 4) {
@@ -326,6 +339,14 @@ void keyPressed() {
         chave=true;          // está com a chav
         mapaDestino[ny][nx] = 0; // transforma chave em chão
       }
+       if (blocoAlvo == 6 ) {
+         if  (chave==true) {
+             
+          fill(255);
+          textSize(100);
+          text("VOCÊ GANHOU!!!",35, height/2);
+          noLoop();}
+      }
       
       mapaAtualX = proximoMapaX;
       mapaAtualY = proximoMapaY;
@@ -333,6 +354,23 @@ void keyPressed() {
       posPlayer.y = ny;
     }
   }
-}
 
+}
+void hud(){
+    
+    //hud
+     textSize(20);
+     fill(corMoedinha);
+     text("moedas: " + moedinhas, 10, 30);
+     fill(corChave);
+     text("chave: "+chave, 10, 90);
+     fill(255);
+     text("Tempo: "+tempo/Ttimer, 10,60 );
+      if (tempo <= 0) {
+  fill(255);
+  textSize(100);
+  text("SEM TEMPO!!!",100, height/2);
+  noLoop();
+  }
+}
  
